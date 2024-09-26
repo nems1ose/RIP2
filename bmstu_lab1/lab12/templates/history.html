@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}ИСТОРИЯ ПРОСМОТРОВ{% endblock %}
+
+{% block content %}
+<style>
+    .space{
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 50px;
+    }
+    .exp-container{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+</style>
+<div class="space">
+    <div class="exp-container">
+        {% for watched_film in data.watched_films %}
+            {% include 'watched_film.html' with element=watched_film %}
+        {% empty %}
+        <li>История просмотров пуста</li>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

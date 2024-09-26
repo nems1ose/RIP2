@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Film Element</title>
+    <style>
+        .card{
+            border-radius: 20px;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-top: 10px;
+            color:black;
+        }
+        .down{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .down p{
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .img-btn {
+            background-color: rgb(255, 085, 000);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 5px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .image{
+            width: 324px;
+            height: 183px;
+            object-fit: cover;
+        }
+        .no-underline {
+            text-decoration: none;
+        }
+        .text-white {
+            color: white;
+        }
+        .no-border {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="info">
+            <img src="{{ element.img }}" class="image">
+        </div>
+        <div class="down">
+            <a href="{% url 'film_url' element.id %}" class="no-underline text-white">Подробнее</a>
+            <button type="button" onclick="GetJournal({element})" class="img-btn">Смотреть</button>
+        </div>
+    </div>
+</body>
+</html>

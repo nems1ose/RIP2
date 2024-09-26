@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    color: #000000; 
+}
+body{
+    background-image: url('images/mainpic.jpg');
+    background-size: cover;
+}
+.space{
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.container{
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 20px;
+}
+.card{
+    border-radius: 20px;
+    background-color: #FFFAFA;
+    padding: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+.image{
+    width: 100%;
+    height: 211px;
+    border-radius: 20px;
+    object-fit: cover;
+}
+.title{
+    margin-top: 16px;
+    font-size: 16px;
+    text-align: center;
+    margin-top: 0px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid #000000;
+    padding: 8px 10px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+.short-description{
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.card-button{
+    padding: 10px 10px; 
+    border-radius: 10px;
+    border: 1px solid #000000;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+.down{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.down p{
+    font-size: 16px;
+    font-weight: 700;
+}
+.img-btn{
+    object-fit: cover;
+    width: 20px;
+    height: 20px;
+}
+.header{
+    background-color:rgba(255, 255, 255, 0.2);
+    border: 1px solid white;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-items: auto;
+}
+.logo{
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+}
+.head-button{
+    margin-top: auto;
+    margin-left: auto;
+    margin-right: 2%;
+    margin-bottom: auto;
+}
+.climber{
+    border-radius: 20px;
+    background-color: #FFFAFA;
+    padding: 2%;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    margin-left: 2%;
+    margin-right: 2%;
+    width:auto;
+    height:5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.image-climber{
+    width: 200px;
+    height: 200px;
+    border-radius: 20px;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    margin-left: 2%;
+    margin-right: 2%;
+}
+.description{
+    font-size: 16px;
+    font-weight: 500;
+}
+.cart{
+    object-fit: cover;
+    width: 4%;
+    height: 5%;
+    margin-top: 1%;
+    margin-left: 5%;
+    background-color: aquamarine;
+}
+.exp-card{
+    border-radius: 20px;
+    background-color: #FFFAFA;
+    padding: 10%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+.exp-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}

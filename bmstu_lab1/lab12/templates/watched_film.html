@@ -1,0 +1,45 @@
+{% load static %}
+<style>
+    .exp-card {
+        background-color: black;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .image {
+        width: 216px;
+        height: 122px;
+        object-fit: cover;
+    }
+    .short-description {
+        font-size: 14px;
+        font-weight: 500;
+        width: 100%;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        margin-left: 2%;
+        margin-right: 2%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .short-description > div {
+        flex-basis: 33.33%;
+        text-align: center;
+        color: white;
+    }
+    .info{
+        margin: 1%;
+    }
+</style>
+<div class="exp-card">
+    <div class="info">
+        <img src="{{ element.img }}" class="image">
+    </div>
+    <div class="short-description">
+        <div>{{ element.name }}</div>
+        <div>{{ element.date }}</div>
+        <div>{{ element.time_stop }} / {{ element.time }} мин</div>
+    </div>
+</div>

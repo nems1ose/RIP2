@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ data.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .film{
+        background-color: #000000;
+        padding: 2%;
+        margin-top: 2%;
+        margin-bottom: 2%;
+        margin-left: 2%;
+        margin-right: 2%;
+        width:auto;
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+    }
+    .image-container{
+        display: flex;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+    .image-film{
+        width: 388px;
+        height: 220px;
+        margin-right: 50px;
+    }
+    .main-info{
+        font-size: 16px;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    .description{
+        font-size: 16px;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 60px;
+    }
+    .info-container {
+        display: flex;
+        justify-content: space-between;
+    }
+    .info-column {
+        flex: 1;
+        text-align: center;
+    }
+    .info-column h3 {
+        font-size: 16px;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .info-column p {
+        font-size: 14px;
+        color: white;
+        font-weight: 400;
+        margin-bottom: 3px;
+    }
+</style>
+    <div class="film">
+        <div class="image-container">
+            <img src="{{ data.img }}" class="image-film">
+            <div class="time-and-year">
+                <p class="main-info">{{ data.year }}</p>
+                <p class="main-info">{{ data.type }}</p>
+                <p class="main-info">{{ data.country }}</p>
+                <p class="main-info">{{ data.time }} мин</p>
+            </div>
+        </div>
+        <p class="description">{{data.description}}</p>
+        <div class="info-container">
+            <div class="info-column">
+                <h3>В главных ролях</h3>
+                {% for main_rols_el in data.main_rols %}
+                <p>{{ main_rols_el }}</p>
+                {% endfor %}
+            </div>
+            <div class="info-column">
+                <h3>Режиссёры</h3>
+                {% for director_el in data.director %}
+                <p>{{ director_el }}</p>
+                {% endfor %}
+            </div>
+            <div class="info-column">
+                <h3>Аудиодорожки</h3>
+                {% for audio_el in data.audio %}
+                <p>{{ audio_el }}</p>
+                {% endfor %}
+            </div>
+            <div class="info-column">
+                <h3>Субтитры</h3>
+                {% for subtitles_el in data.subtitles %}
+                <p>{{ subtitles_el }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
