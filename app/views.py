@@ -11,7 +11,7 @@ from .serializers import *
 
 
 def get_draft_history():
-    return History.objects.filter(status=1).first()
+    return History.objects.filter(status="putin").first()
 
 
 def get_user():
@@ -26,7 +26,7 @@ def get_moderator():
 def search_films(request):
     film_name = request.GET.get("film_name", "")
 
-    films = Film.objects.filter(status=1)
+    films = Film.objects.filter(status="activ")
 
     if film_name:
         films = films.filter(name__icontains=film_name)
@@ -48,8 +48,10 @@ def search_films(request):
 def get_film_by_id(request, film_id):
     if not Film.objects.filter(pk=film_id).exists():
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    films = Film.objects.filter(status="activ")
 
-    film = Film.objects.get(pk=film_id)
+    film = films.get(pk=film_id)
     serializer = FilmSerializer(film, many=False)
 
     return Response(serializer.data)
@@ -79,7 +81,7 @@ def update_film(request, film_id):
 def create_film(request):
     Film.objects.create()
 
-    films = Film.objects.filter(status=1)
+    films = Film.objects.filter(status="activ")
     serializer = FilmSerializer(films, many=True)
 
     return Response(serializer.data)
@@ -91,10 +93,10 @@ def delete_film(request, film_id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     film = Film.objects.get(pk=film_id)
-    film.status = 2
+    film.status = "delet"
     film.save()
 
-    films = Film.objects.filter(status=1)
+    films = Film.objects.filter(status="activ")
     serializer = FilmSerializer(films, many=True)
 
     return Response(serializer.data)
@@ -146,13 +148,13 @@ def update_film_image(request, film_id):
 
 @api_view(["GET"])
 def search_historys(request):
-    status = int(request.GET.get("status", 0))
+    status = request.GET.get("status", "unkno")
     date_formation_start = request.GET.get("date_formation_start")
     date_formation_end = request.GET.get("date_formation_end")
 
-    historys = History.objects.exclude(status__in=[1, 5])
+    historys = History.objects.exclude(status__in=["putin", "delet"])
 
-    if status > 0:
+    if status != "unkno":
         historys = historys.filter(status=status)
 
     if date_formation_start and parse_datetime(date_formation_start):
@@ -170,8 +172,10 @@ def search_historys(request):
 def get_history_by_id(request, history_id):
     if not History.objects.filter(pk=history_id).exists():
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    historys = History.objects.exclude(status__in=["putin", "delet"])
 
-    history = History.objects.get(pk=history_id)
+    history = historys.get(pk=history_id)
     serializer = HistorySerializer(history, many=False)
 
     return Response(serializer.data)
@@ -198,10 +202,10 @@ def update_status_user(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != 1:
+    if history.status != "putin":
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    history.status = 2
+    history.status = "atwor"
     history.date_formation = timezone.now()
     history.save()
 
@@ -215,14 +219,14 @@ def update_status_admin(request, history_id):
     if not History.objects.filter(pk=history_id).exists():
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    request_status = int(request.data["status"])
+    request_status = request.data["status"]
 
-    if request_status not in [3, 4]:
+    if request_status not in ["compl", "rejec"]:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != 2:
+    if history.status != "atwor":
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     history.date_complete = timezone.now()
@@ -242,10 +246,10 @@ def delete_history(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != 1:
+    if history.status != "putin":
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    history.status = 5
+    history.status = "delet"
     history.save()
 
     serializer = HistorySerializer(history, many=False)

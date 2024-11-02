@@ -6,12 +6,12 @@ from django.contrib.auth.models import User
 
 class Film(models.Model):
     STATUS_CHOICES = (
-        (1, 'Действует'),
-        (2, 'Удалена'),
+        ("activ", 'Действует'),
+        ("delet", 'Удалена'),
     )
 
     name = models.CharField(max_length=100, verbose_name="Название", blank=True)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
+    status = models.CharField(choices=STATUS_CHOICES, default="activ", verbose_name="Статус")
     image = models.ImageField(default="default.png", blank=True)
     description = models.TextField(verbose_name="Описание", blank=True)
 
@@ -33,14 +33,14 @@ class Film(models.Model):
 
 class History(models.Model):
     STATUS_CHOICES = (
-        (1, 'Введён'),
-        (2, 'В работе'),
-        (3, 'Завершен'),
-        (4, 'Отклонен'),
-        (5, 'Удален')
+        ("putin", 'Введён'),
+        ("atwor", 'В работе'),
+        ("compl", 'Завершен'),
+        ("rejec", 'Отклонен'),
+        ("delet", 'Удален')
     )
 
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
+    status = models.CharField(choices=STATUS_CHOICES, default="putin", verbose_name="Статус")
     date_created = models.DateTimeField(default=timezone.now(), verbose_name="Дата создания")
     date_formation = models.DateTimeField(verbose_name="Дата формирования", blank=True, null=True)
     date_complete = models.DateTimeField(verbose_name="Дата завершения", blank=True, null=True)

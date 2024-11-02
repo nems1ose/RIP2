@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=100, verbose_name='Название')),
-                ('status', models.IntegerField(choices=[(1, 'Действует'), (2, 'Удалена')], default=1, verbose_name='Статус')),
+                ('status', models.CharField(choices=[("activ", 'Действует'), ("delet", 'Удалена')], default="activ", verbose_name='Статус')),
                 ('image', models.ImageField(blank=True, default='default.png', upload_to='')),
                 ('description', models.TextField(blank=True, verbose_name='Описание')),
                 ('time', models.IntegerField(blank=True)),
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
             name='History',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.IntegerField(choices=[(1, 'Введён'), (2, 'В работе'), (3, 'Завершен'), (4, 'Отклонен'), (5, 'Удален')], default=1, verbose_name='Статус')),
+                ('status', models.CharField(choices=[("putin", 'Введён'), ("atwor", 'В работе'), ("compl", 'Завершен'), ("rejec", 'Отклонен'), ("delet", 'Удален')], default="putin", verbose_name='Статус')),
                 ('date_created', models.DateTimeField(default=datetime.datetime(2024, 10, 29, 22, 18, 56, 808043, tzinfo=datetime.timezone.utc), verbose_name='Дата создания')),
                 ('date_formation', models.DateTimeField(blank=True, null=True, verbose_name='Дата формирования')),
                 ('date_complete', models.DateTimeField(blank=True, null=True, verbose_name='Дата завершения')),

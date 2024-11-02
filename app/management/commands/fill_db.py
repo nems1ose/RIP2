@@ -21,7 +21,7 @@ def add_users():
 def add_films():
     Film.objects.create(
         name="Большая игра",
-        description="Один из самых полезных для человека фильм. Оно богато белком, витаминами A и D, кальцием. Недаром с давних пор люди стали не только покупать молоко оптом, но и придумывать рецепты изготовления из него разных фильм.",
+        description="После очередной травмы могулистка Молли Блум решает завязать со спортом и пожить обычной жизнью. Так получается, что девушка сначала работает хостесс на нелегальных покерных играх, а вскоре и сама становится организатором подпольного казино для знаменитостей, миллионеров, членов королевских семей и других любителей в мгновение ока спустить целое состояние.",
         time=134,
         year=2017,
         country="США",
@@ -96,10 +96,10 @@ def add_historys():
     films = Film.objects.all()
 
     for _ in range(30):
-        status = random.randint(2, 5)
+        status = random.choice(["atwor", "compl", "rejec", "delet"])
         add_history(status, films, users, moderators)
 
-    add_history(1, films, users, moderators)
+    add_history("putin", films, users, moderators)
 
     print("Заявки добавлены")
 
@@ -108,7 +108,7 @@ def add_history(status, films, users, moderators):
     history = History.objects.create()
     history.status = status
 
-    if history.status in [3, 4]:
+    if history.status in ["compl", "rejec"]:
         history.date_complete = random_date()
         history.date_formation = history.date_complete - random_timedelta()
         history.date_created = history.date_formation - random_timedelta()
