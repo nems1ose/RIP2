@@ -81,12 +81,12 @@ def update_film(request, film_id):
 
 @api_view(["POST"])
 def create_film(request):
-    Film.objects.create()
+    serializer = FilmSerializer(data=request.data)
 
-    films = Film.objects.filter(status="activ")
-    serializer = FilmSerializer(films, many=True)
-
-    return Response(serializer.data)
+    if serializer.is_valid():
+        film = serializer.save()
+        return Response(FilmSerializer(film).data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["DELETE"])
