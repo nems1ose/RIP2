@@ -48,10 +48,12 @@ def search_films(request):
 def get_film_by_id(request, film_id):
     if not Film.objects.filter(pk=film_id).exists():
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
-    films = Film.objects.filter(status="activ")
 
-    film = films.get(pk=film_id)
+    film = Film.objects.get(pk=film_id)
+
+    if film.status != "activ":
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
     serializer = FilmSerializer(film, many=False)
 
     return Response(serializer.data)
@@ -172,10 +174,12 @@ def search_historys(request):
 def get_history_by_id(request, history_id):
     if not History.objects.filter(pk=history_id).exists():
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
-    historys = History.objects.exclude(status__in=["putin", "delet"])
 
-    history = historys.get(pk=history_id)
+    history = History.objects.get(pk=history_id)
+
+    if history.status == "putin" or history.status == "delet":
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
     serializer = HistorySerializer(history, many=False)
 
     return Response(serializer.data)
