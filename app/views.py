@@ -9,7 +9,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-# from .management.commands.fill_db import calc
 from .permissions import *
 from .redis import session_storage
 from .serializers import *
@@ -22,7 +21,7 @@ def get_draft_history(request):
     if user is None:
         return None
 
-    history = History.objects.filter(owner=user).filter(status=1).first()
+    history = History.objects.filter(owner=user).filter(status="putin").first()
 
     return history
 
@@ -41,7 +40,7 @@ def get_draft_history(request):
 def search_films(request):
     film_name = request.GET.get("film_name", "")
 
-    films = Film.objects.filter(status=1)
+    films = Film.objects.filter(status="activ")
 
     if film_name:
         films = films.filter(name__icontains=film_name)
@@ -62,10 +61,14 @@ def search_films(request):
 @api_view(["GET"])
 def get_film_by_id(request, film_id):
     if not Film.objects.filter(pk=film_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет фильма с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     film = Film.objects.get(pk=film_id)
-    serializer = FilmSerializer(film)
+
+    if film.status != "activ":
+        return Response({"detail": "Фильма с данным id удален"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = FilmSerializer(film, many=False)
 
     return Response(serializer.data)
 
@@ -75,9 +78,13 @@ def get_film_by_id(request, film_id):
 @permission_classes([IsModerator])
 def update_film(request, film_id):
     if not Film.objects.filter(pk=film_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет фильма с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     film = Film.objects.get(pk=film_id)
+
+    status_value = request.data.get("status")
+    if status_value is not None and status_value not in ["activ", "delet"]:
+        return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     serializer = FilmSerializer(film, data=request.data)
 
@@ -97,7 +104,7 @@ def create_film(request):
 
     Film.objects.create(**serializer.validated_data)
 
-    films = Film.objects.filter(status=1)
+    films = Film.objects.filter(status="activ")
     serializer = FilmSerializer(films, many=True)
 
     return Response(serializer.data)
@@ -107,13 +114,13 @@ def create_film(request):
 @permission_classes([IsModerator])
 def delete_film(request, film_id):
     if not Film.objects.filter(pk=film_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет фильма с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     film = Film.objects.get(pk=film_id)
-    film.status = 2
+    film.status = "delet"
     film.save()
 
-    film = Film.objects.filter(status=1)
+    film = Film.objects.filter(status="activ")
     serializer = FilmSerializer(film, many=True)
 
     return Response(serializer.data)
@@ -124,7 +131,7 @@ def delete_film(request, film_id):
 @permission_classes([IsAuthenticated])
 def add_film_to_history(request, film_id):
     if not Film.objects.filter(pk=film_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет фильма с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     film = Film.objects.get(pk=film_id)
 
@@ -152,14 +159,14 @@ def add_film_to_history(request, film_id):
 @permission_classes([IsModerator])
 def update_film_image(request, film_id):
     if not Film.objects.filter(pk=film_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет фильма с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     film = Film.objects.get(pk=film_id)
 
     image = request.data.get("image")
 
     if image is None:
-        return Response(status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Картинка не предоставлена"}, status.HTTP_400_BAD_REQUEST)
 
     film.image = image
     film.save()
@@ -172,18 +179,18 @@ def update_film_image(request, film_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def search_historys(request):
-    status_id = int(request.GET.get("status", 0))
+    status = request.GET.get("status", "unkno")
     date_formation_start = request.GET.get("date_formation_start")
     date_formation_end = request.GET.get("date_formation_end")
 
-    historys = History.objects.exclude(status__in=[1, 5])
+    historys = History.objects.exclude(status__in=["putin", "delet"])
 
     user = identity_user(request)
     if not user.is_superuser:
         historys = historys.filter(owner=user)
 
-    if status_id > 0:
-        historys = historys.filter(status=status_id)
+    if status != "unkno":
+        historys = historys.filter(status=status)
 
     if date_formation_start and parse_datetime(date_formation_start):
         historys = historys.filter(date_formation__gte=parse_datetime(date_formation_start))
@@ -202,9 +209,13 @@ def get_history_by_id(request, history_id):
     user = identity_user(request)
 
     if not History.objects.filter(pk=history_id, owner=user).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     history = History.objects.get(pk=history_id)
+
+    if history.status == "putin" or history.status == "delet":
+        return Response({"detail": "История с данным id недействительна"}, status=status.HTTP_404_NOT_FOUND)
+    
     serializer = HistorySerializer(history)
 
     return Response(serializer.data)
@@ -217,7 +228,7 @@ def update_history(request, history_id):
     user = identity_user(request)
 
     if not History.objects.filter(pk=history_id, owner=user).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     history = History.objects.get(pk=history_id)
     serializer = HistorySerializer(history, data=request.data, partial=True)
@@ -235,14 +246,14 @@ def update_status_user(request, history_id):
     user = identity_user(request)
 
     if not History.objects.filter(pk=history_id, owner=user).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != 1:
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    if history.status != "putin":
+        return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    history.status = 2
+    history.status = "atwor"
     history.date_formation = timezone.now()
     history.save()
 
@@ -256,19 +267,19 @@ def update_status_user(request, history_id):
 @permission_classes([IsModerator])
 def update_status_admin(request, history_id):
     if not History.objects.filter(pk=history_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
-    request_status = int(request.data["status"])
+    request_status = request.data["status"]
 
-    if request_status not in [3, 4]:
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    if request_status not in ["compl", "rejec"]:
+        return Response({"detail": "Вы не можете установить данный статус для истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != 2:
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    if history.status != "atwor":
+        return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    if request_status == 3:
+    if request_status == "compl":
         history.date = random_date()
 
     history.status = request_status
@@ -287,14 +298,14 @@ def delete_history(request, history_id):
     user = identity_user(request)
 
     if not History.objects.filter(pk=history_id, owner=user).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != 1:
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    if history.status != "putin":
+        return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    history.status = 5
+    history.status = "delet"
     history.save()
 
     return Response(status=status.HTTP_200_OK)
@@ -306,10 +317,10 @@ def delete_film_from_history(request, history_id, film_id):
     user = identity_user(request)
 
     if not History.objects.filter(pk=history_id, owner=user).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     if not FilmHistory.objects.filter(history_id=history_id, film_id=film_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет фильма с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     item = FilmHistory.objects.get(history_id=history_id, film_id=film_id)
     item.delete()
@@ -318,6 +329,10 @@ def delete_film_from_history(request, history_id, film_id):
 
     serializer = HistorySerializer(history)
     films = serializer.data["films"]
+
+    if len(films) == 0:
+        history.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     return Response(films)
 
@@ -329,10 +344,10 @@ def update_film_in_history(request, history_id, film_id):
     user = identity_user(request)
 
     if not History.objects.filter(pk=history_id, owner=user).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     if not FilmHistory.objects.filter(film_id=film_id, history_id=history_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Нет фильма с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     item = FilmHistory.objects.get(film_id=film_id, history_id=history_id)
 
@@ -372,7 +387,7 @@ def register(request):
     serializer = UserRegisterSerializer(data=request.data)
 
     if not serializer.is_valid():
-        return Response(status=status.HTTP_409_CONFLICT)
+        return Response({"detail": "Пользователь с данным логином уже существует"}, status=status.HTTP_409_CONFLICT)
 
     user = serializer.save()
 
@@ -403,7 +418,7 @@ def logout(request):
 @permission_classes([IsAuthenticated])
 def update_user(request, user_id):
     if not User.objects.filter(pk=user_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Пользователя с данным логином не существует"}, status=status.HTTP_404_NOT_FOUND)
 
     user = identity_user(request)
 

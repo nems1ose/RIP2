@@ -94,12 +94,12 @@ def add_historys():
     films = Film.objects.all()
 
     for _ in range(30):
-        status = random.randint(2, 5)
+        status = random.choice(["atwor", "compl", "rejec", "delet"])
         owner = random.choice(users)
         add_history(status, films, owner, moderators)
 
-    add_history(1, films, users[0], moderators)
-    add_history(2, films, users[0], moderators)
+    add_history("putin", films, users[0], moderators)
+    add_history("atwor", films, users[0], moderators)
 
     print("Заявки добавлены")
 
@@ -108,7 +108,7 @@ def add_history(status, films, owner, moderators):
     history = History.objects.create()
     history.status = status
 
-    if status in [3, 4]:
+    if history.status in ["compl", "rejec"]:
         history.moderator = random.choice(moderators)
         history.date_complete = random_date()
         history.date_formation = history.date_complete - random_timedelta()
@@ -117,7 +117,7 @@ def add_history(status, films, owner, moderators):
         history.date_formation = random_date()
         history.date_created = history.date_formation - random_timedelta()
 
-    if status == 3:
+    if status == "compl":
         history.date = random_date()
 
     history.estimation = random.randint(1, 5)

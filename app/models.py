@@ -5,13 +5,13 @@ from django.db import models
 
 class Film(models.Model):
     STATUS_CHOICES = (
-        (1, 'Действует'),
-        (2, 'Удалена'),
+        ("activ", 'Действует'),
+        ("delet", 'Удалена'),
     )
 
     name = models.CharField(max_length=100, verbose_name="Название")
     description = models.TextField(max_length=500, verbose_name="Описание",)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
+    status = models.CharField(choices=STATUS_CHOICES, default="activ", verbose_name="Статус")
     image = models.ImageField(verbose_name="Фото", blank=True, null=True)
 
     time = models.IntegerField()
@@ -29,14 +29,14 @@ class Film(models.Model):
 
 class History(models.Model):
     STATUS_CHOICES = (
-        (1, 'Введён'),
-        (2, 'В работе'),
-        (3, 'Завершен'),
-        (4, 'Отклонен'),
-        (5, 'Удален')
+        ("putin", 'Введён'),
+        ("atwor", 'В работе'),
+        ("compl", 'Завершен'),
+        ("rejec", 'Отклонен'),
+        ("delet", 'Удален')
     )
 
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
+    status = models.CharField(choices=STATUS_CHOICES, default="putin", verbose_name="Статус")
     date_created = models.DateTimeField(verbose_name="Дата создания", blank=True, null=True)
     date_formation = models.DateTimeField(verbose_name="Дата формирования", blank=True, null=True)
     date_complete = models.DateTimeField(verbose_name="Дата завершения", blank=True, null=True)
