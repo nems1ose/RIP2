@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <main class="container">
+
+        <h3  class="text-center">Черновая история</h3>
+
+         <div class="form-group">
+            <label class="form-label">Дата</label>
+            {% if history.date %}
+                <input placeholder="Введите дату" disabled type="text" class="form-control" style="width: 250px" value="{{ history.date }}">
+            {% else %}
+                <input placeholder="Введите дату" disabled type="text" class="form-control" style="width: 250px">
+            {% endif %}
+        </div>
+
+        <form method="post" action="{% url 'delete_history' history.id %}">
+            {% csrf_token %}
+                <button class="btn btn-danger delete-draft-history-btn" type="submit">
+                    Удалить
+                </button>
+            </a>
+        </form>
+
+        <h4 class="text-center">Фильмы</h4>
+
+        <div class="cards-wrapper d-flex flex-column">
+
+            {% for film in history.get_films %}
+
+                {% include "film_card.html" %}
+
+            {% endfor %}
+
+        </div>
+
+    </main>
+{% endblock content %}
