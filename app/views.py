@@ -324,11 +324,11 @@ def login(request):
     serializer = UserLoginSerializer(data=request.data)
 
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"detail": "Заполните оба поля: username, password"}, status=status.HTTP_401_UNAUTHORIZED)
 
     user = authenticate(**serializer.data)
     if user is None:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"detail": "Логин или пароль введены неверно"}, status=status.HTTP_401_UNAUTHORIZED)
 
     serializer = UserSerializer(user)
 
@@ -349,7 +349,7 @@ def update_user(request, user_id):
     serializer = UserSerializer(user, data=request.data, partial=True)
 
     if not serializer.is_valid():
-        return Response(status=status.HTTP_409_CONFLICT)
+        return Response({"detail": "Введены некорректные данные для обновления"}, status=status.HTTP_409_CONFLICT)
 
     serializer.save()
 
