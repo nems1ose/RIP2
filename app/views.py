@@ -84,7 +84,7 @@ def update_film(request, film_id):
 
     status_value = request.data.get("status")
     if status_value is not None and status_value not in ["activ", "delet"]:
-        return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_405_INTERNAL_SERVER_ERROR)
 
     serializer = FilmSerializer(film, data=request.data)
 
@@ -231,6 +231,11 @@ def update_history(request, history_id):
         return Response({"detail": "Нет истории с данным id"}, status=status.HTTP_404_NOT_FOUND)
 
     history = History.objects.get(pk=history_id)
+
+    status_value = request.data.get("status")
+    if status_value is not None and status_value not in ["putin", "atwor", "compl", "rejec", "delet"]:
+        return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_405_INTERNAL_SERVER_ERROR)
+    
     serializer = HistorySerializer(history, data=request.data, partial=True)
 
     if serializer.is_valid():
