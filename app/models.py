@@ -3,6 +3,20 @@ from django.utils import timezone
 
 from django.contrib.auth.models import User
 
+
+class FilmStatus(models.Model):
+    eng_key = models.CharField(max_length=50, verbose_name="Название")
+    name = models.CharField(max_length=50, verbose_name="Описание")
+
+    def __str__(self):
+        return self.eng_key
+
+    class Meta:
+        verbose_name = "Статус фильма"
+        verbose_name_plural = "Статусы фильмов"
+        db_table = "film_status"
+
+
 class HistoryStatus(models.Model):
     eng_key = models.CharField(max_length=50, verbose_name="Название")
     name = models.CharField(max_length=50, verbose_name="Описание")
@@ -17,13 +31,13 @@ class HistoryStatus(models.Model):
 
 
 class Film(models.Model):
-    STATUS_CHOICES = (
-        ("activ", 'Действует'),
-        ("delet", 'Удалена'),
-    )
+    # STATUS_CHOICES = (
+    #     ("activ", 'Действует'),
+    #     ("delet", 'Удалена'),
+    # )
 
     name = models.CharField(max_length=100, verbose_name="Название", blank=True)
-    status = models.CharField(choices=STATUS_CHOICES, default="activ", verbose_name="Статус")
+    status = models.ForeignKey(FilmStatus, on_delete=models.DO_NOTHING, blank=True, null=True)
     image = models.ImageField(default="default.png", blank=True)
     description = models.TextField(verbose_name="Описание", blank=True)
 

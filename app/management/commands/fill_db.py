@@ -17,6 +17,19 @@ def add_users():
 
     print("Пользователи созданы")
 
+def add_film_status():
+    FilmStatus.objects.create(
+        eng_key="activ",
+        name="Действует"
+    )
+
+    FilmStatus.objects.create(
+        eng_key="delet",
+        name="Удалена"
+    )
+
+    print("Статусы фильмов добавлены")
+
 def add_history_status():
     HistoryStatus.objects.create(
         eng_key="putin",
@@ -47,13 +60,17 @@ def add_history_status():
 
 
 def add_films():
+
+    status = FilmStatus.objects.get(eng_key='activ')
+
     Film.objects.create(
         name="Большая игра",
         description="После очередной травмы могулистка Молли Блум решает завязать со спортом и пожить обычной жизнью. Так получается, что девушка сначала работает хостесс на нелегальных покерных играх, а вскоре и сама становится организатором подпольного казино для знаменитостей, миллионеров, членов королевских семей и других любителей в мгновение ока спустить целое состояние.",
         time=134,
         year=2017,
         country="США",
-        image="1.png"
+        image="1.png",
+        status=status
     )
 
     Film.objects.create(
@@ -62,7 +79,8 @@ def add_films():
         time=127,
         year=2016,
         country="США",
-        image="2.png"
+        image="2.png",
+        status=status
     )
 
     Film.objects.create(
@@ -71,7 +89,8 @@ def add_films():
         time=113,
         year=2021,
         country="Великобритания",
-        image="3.png"
+        image="3.png",
+        status=status
     )
 
     Film.objects.create(
@@ -80,7 +99,8 @@ def add_films():
         time=120,
         year=2015,
         country="США",
-        image="4.png"
+        image="4.png",
+        status=status
     )
 
     Film.objects.create(
@@ -89,7 +109,8 @@ def add_films():
         time=107,
         year=2017,
         country="США",
-        image="5.png"
+        image="5.png",
+        status=status
     )
 
     Film.objects.create(
@@ -98,7 +119,8 @@ def add_films():
         time=76,
         year=2020,
         country="Россия",
-        image="6.png"
+        image="6.png",
+        status=status
     )
 
     client = Minio("minio:9000", "minio", "minio123", secure=False)
@@ -169,6 +191,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         add_users()
         add_history_status()
+        add_film_status()
         add_films()
         add_historys()
 
