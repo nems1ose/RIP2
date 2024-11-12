@@ -15,15 +15,60 @@ def add_users():
 
     print("Пользователи созданы")
 
+def add_film_status():
+    FilmStatus.objects.create(
+        eng_key="activ",
+        name="Действует"
+    )
+
+    FilmStatus.objects.create(
+        eng_key="delet",
+        name="Удалена"
+    )
+
+    print("Статусы фильмов добавлены")
+
+def add_history_status():
+    HistoryStatus.objects.create(
+        eng_key="putin",
+        name="Введён"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="atwor",
+        name="В работе"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="compl",
+        name="Завершен"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="rejec",
+        name="Отклонен"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="delet",
+        name="Удален"
+    )
+
+    print("Статусы историй добавлены")
+
 
 def add_films():
+
+    status = FilmStatus.objects.get(eng_key='activ')
+
     Film.objects.create(
         name="Большая игра",
         description="Один из самых полезных для человека фильм. Оно богато белком, витаминами A и D, кальцием. Недаром с давних пор люди стали не только покупать молоко оптом, но и придумывать рецепты изготовления из него разных фильм.",
         time=134,
         year=2017,
         country="США",
-        image="1.png"
+        image="1.png",
+        status=status
     )
 
     Film.objects.create(
@@ -32,7 +77,8 @@ def add_films():
         time=127,
         year=2016,
         country="США",
-        image="2.png"
+        image="2.png",
+        status=status
     )
 
     Film.objects.create(
@@ -41,7 +87,8 @@ def add_films():
         time=113,
         year=2021,
         country="Великобритания",
-        image="3.png"
+        image="3.png",
+        status=status
     )
 
     Film.objects.create(
@@ -50,7 +97,8 @@ def add_films():
         time=120,
         year=2015,
         country="США",
-        image="4.png"
+        image="4.png",
+        status=status
     )
 
     Film.objects.create(
@@ -59,7 +107,8 @@ def add_films():
         time=107,
         year=2017,
         country="США",
-        image="5.png"
+        image="5.png",
+        status=status
     )
 
     Film.objects.create(
@@ -68,7 +117,8 @@ def add_films():
         time=76,
         year=2020,
         country="Россия",
-        image="6.png"
+        image="6.png",
+        status=status
     )
 
     client = Minio("minio:9000", "minio", "minio123", secure=False)
@@ -86,20 +136,25 @@ def add_films():
 def add_historys():
     users = User.objects.filter(is_staff=False)
     moderators = User.objects.filter(is_staff=True)
+    statuses = HistoryStatus.objects.exclude(name='putin')
 
     if len(users) == 0 or len(moderators) == 0:
         print("Заявки не могут быть добавлены. Сначала добавьте пользователей с помощью команды add_users")
+        return
+    
+    if len(statuses) == 0:
+        print('Для заполнения историй добавь статусы')
         return
 
     films = Film.objects.all()
 
     for _ in range(30):
-        status = random.choice(["atwor", "compl", "rejec", "delet"])
+        status = random.choice(statuses)
         owner = random.choice(users)
         add_history(status, films, owner, moderators)
 
-    add_history("putin", films, users[0], moderators)
-    add_history("atwor", films, users[0], moderators)
+    # add_history("putin", films, users[0], moderators)
+    # add_history("atwor", films, users[0], moderators)
 
     print("Заявки добавлены")
 
@@ -138,5 +193,7 @@ def add_history(status, films, owner, moderators):
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         add_users()
+        add_film_status()
+        add_history_status()
         add_films()
         add_historys()

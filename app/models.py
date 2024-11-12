@@ -3,15 +3,41 @@ from django.contrib.auth.models import PermissionsMixin, User
 from django.db import models
 
 
+class FilmStatus(models.Model):
+    eng_key = models.CharField(max_length=50, verbose_name="Название")
+    name = models.CharField(max_length=50, verbose_name="Описание")
+
+    def __str__(self):
+        return self.eng_key
+
+    class Meta:
+        verbose_name = "Статус фильма"
+        verbose_name_plural = "Статусы фильмов"
+        db_table = "film_status"
+
+
+class HistoryStatus(models.Model):
+    eng_key = models.CharField(max_length=50, verbose_name="Название")
+    name = models.CharField(max_length=50, verbose_name="Описание")
+
+    def __str__(self):
+        return self.eng_key
+
+    class Meta:
+        verbose_name = "Статус истории"
+        verbose_name_plural = "Статусы историй"
+        db_table = "history_status"
+
+
 class Film(models.Model):
-    STATUS_CHOICES = (
-        ("activ", 'Действует'),
-        ("delet", 'Удалена'),
-    )
+    # STATUS_CHOICES = (
+    #     ("activ", 'Действует'),
+    #     ("delet", 'Удалена'),
+    # )
 
     name = models.CharField(max_length=100, verbose_name="Название")
     description = models.TextField(max_length=500, verbose_name="Описание",)
-    status = models.CharField(choices=STATUS_CHOICES, default="activ", verbose_name="Статус")
+    status = models.ForeignKey(FilmStatus, on_delete=models.DO_NOTHING, blank=True, null=True)
     image = models.ImageField(verbose_name="Фото", blank=True, null=True)
 
     time = models.IntegerField()
@@ -28,15 +54,15 @@ class Film(models.Model):
 
 
 class History(models.Model):
-    STATUS_CHOICES = (
-        ("putin", 'Введён'),
-        ("atwor", 'В работе'),
-        ("compl", 'Завершен'),
-        ("rejec", 'Отклонен'),
-        ("delet", 'Удален')
-    )
+    # STATUS_CHOICES = (
+    #     ("putin", 'Введён'),
+    #     ("atwor", 'В работе'),
+    #     ("compl", 'Завершен'),
+    #     ("rejec", 'Отклонен'),
+    #     ("delet", 'Удален')
+    # )
 
-    status = models.CharField(choices=STATUS_CHOICES, default="putin", verbose_name="Статус")
+    status = models.ForeignKey(HistoryStatus, on_delete=models.DO_NOTHING, blank=True, null=True)
     date_created = models.DateTimeField(verbose_name="Дата создания", blank=True, null=True)
     date_formation = models.DateTimeField(verbose_name="Дата формирования", blank=True, null=True)
     date_complete = models.DateTimeField(verbose_name="Дата завершения", blank=True, null=True)

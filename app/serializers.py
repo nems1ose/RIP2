@@ -3,24 +3,29 @@ from rest_framework import serializers
 from .models import *
 
 
-class FilmsSerializer(serializers.ModelSerializer):
+class FilmSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
     def get_image(self, film):
-        if film.image:
-            return film.image.url.replace("minio", "localhost", 1)
-
-        return "http://localhost:9000/images/default.png"
+        return film.image.url.replace("minio", "localhost", 1)
+    
+    def get_status(self, film):
+        return film.status.name
 
     class Meta:
         model = Film
-        fields = ("id", "name", "status", "time", "image")
+        fields = "__all__"
 
+class FilmSerializerUpd(serializers.ModelSerializer):
+    # image = serializers.SerializerMethodField()
 
-class FilmSerializer(FilmsSerializer):
-    class Meta(FilmsSerializer.Meta):
+    # def get_image(self, film):
+    #     return film.image.url.replace("minio", "localhost", 1)
+
+    class Meta:
         model = Film
-        fields = FilmsSerializer.Meta.fields + ("description", )
+        fields = "__all__"
 
 
 class HistorysSerializer(serializers.ModelSerializer):
@@ -31,8 +36,32 @@ class HistorysSerializer(serializers.ModelSerializer):
         model = History
         fields = "__all__"
 
+class HistorySerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+    films = serializers.SerializerMethodField()
+    owner = serializers.SerializerMethodField()
+    moderator = serializers.SerializerMethodField()
 
-class HistorySerializer(HistorysSerializer):
+    def get_owner(self, history):
+        return history.owner.username
+
+    def get_moderator(self, history):
+        if history.moderator:
+            return history.moderator.username
+        
+    def get_status(self, history):
+        return history.status.name
+            
+    def get_films(self, history):
+        items = FilmHistory.objects.filter(history=history)
+        return [FilmItemSerializer(item.film, context={"value": item.viewed}).data for item in items]
+
+    class Meta:
+        model = History
+        fields = '__all__'
+
+
+class HistorySerializerUpd(HistorysSerializer):
     films = serializers.SerializerMethodField()
 
     def get_films(self, history):
