@@ -17,6 +17,34 @@ def add_users():
 
     print("Пользователи созданы")
 
+def add_history_status():
+    HistoryStatus.objects.create(
+        eng_key="putin",
+        name="Введён"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="atwor",
+        name="В работе"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="compl",
+        name="Завершен"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="rejec",
+        name="Отклонен"
+    )
+
+    HistoryStatus.objects.create(
+        eng_key="delet",
+        name="Удален"
+    )
+
+    print("Статусы историй добавлены")
+
 
 def add_films():
     Film.objects.create(
@@ -88,18 +116,23 @@ def add_films():
 def add_historys():
     users = User.objects.filter(is_superuser=False)
     moderators = User.objects.filter(is_superuser=True)
+    statuses = HistoryStatus.objects.exclude(name='putin')
 
     if len(users) == 0 or len(moderators) == 0:
         print("Заявки не могут быть добавлены. Сначала добавьте пользователей с помощью команды add_users")
+        return
+    
+    if len(statuses) == 0:
+        print('Для заполнения историй добавь статусы')
         return
 
     films = Film.objects.all()
 
     for _ in range(30):
-        status = random.choice(["atwor", "compl", "rejec", "delet"])
+        status = random.choice(statuses)
         add_history(status, films, users, moderators)
 
-    add_history("putin", films, users, moderators)
+    # add_history("putin", films, users, moderators)
 
     print("Заявки добавлены")
 
@@ -135,6 +168,7 @@ def add_history(status, films, users, moderators):
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         add_users()
+        add_history_status()
         add_films()
         add_historys()
 

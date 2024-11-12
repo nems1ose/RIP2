@@ -7,11 +7,13 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from django.shortcuts import get_object_or_404
+
 from .serializers import *
 
 
 def get_draft_history():
-    return History.objects.filter(status="putin").first()
+    History.objects.filter(status__eng_key="putin").first()
 
 
 def get_user():
@@ -154,14 +156,14 @@ def update_film_image(request, film_id):
 
 @api_view(["GET"])
 def search_historys(request):
-    status = request.GET.get("status", "unkno")
+    status = request.GET.get("status", "unknown")
     date_formation_start = request.GET.get("date_formation_start")
     date_formation_end = request.GET.get("date_formation_end")
 
-    historys = History.objects.exclude(status__in=["putin", "delet"])
+    historys = History.objects.exclude(status__eng_key__in=["putin", "delet"])
 
-    if status != "unkno":
-        historys = historys.filter(status=status)
+    if status != "unknown":
+        historys = historys.filter(status__name=status)
 
     if date_formation_start and parse_datetime(date_formation_start):
         historys = historys.filter(date_formation__gte=parse_datetime(date_formation_start))
@@ -181,7 +183,7 @@ def get_history_by_id(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status == "putin" or history.status == "delet":
+    if history.status.eng_key == "putin" or history.status.eng_key == "delet":
         return Response({"detail": "История с данным id недействительна"}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = HistorySerializer(history, many=False)
@@ -197,15 +199,22 @@ def update_history(request, history_id):
     history = History.objects.get(pk=history_id)
 
     status_value = request.data.get("status")
-    if status_value is not None and status_value not in ["putin", "atwor", "compl", "rejec", "delet"]:
-        return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_405_INTERNAL_SERVER_ERROR)
 
-    serializer = HistorySerializer(history, data=request.data, partial=True)
+    if status_value is not None:
+        try:
+            history_status = HistoryStatus.objects.get(name=status_value)
+            request.data['status'] = history_status.id
+        except HistoryStatus.DoesNotExist:
+            return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_405_INTERNAL_SERVER_ERROR)
+
+    serializer = HistorySerializerUpd(history, data=request.data, partial=True)
 
     if serializer.is_valid():
         serializer.save()
 
-    return Response(serializer.data)
+    serializerOutput = HistorySerializer(history, many=False)
+
+    return Response(serializerOutput.data)
 
 
 @api_view(["PUT"])
@@ -215,10 +224,12 @@ def update_status_user(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != "putin":
+    if history.status.eng_key != "putin":
         return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    new_status = get_object_or_404(HistoryStatus, id=2)
 
-    history.status = "atwor"
+    history.status = new_status
     history.date_formation = timezone.now()
     history.save()
 
@@ -234,16 +245,21 @@ def update_status_admin(request, history_id):
 
     request_status = request.data["status"]
 
-    if request_status not in ["compl", "rejec"]:
+    if request_status not in ["Завершен", "Отклонен"]:
         return Response({"detail": "Вы не можете установить данный статус для истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != "atwor":
+    if history.status.eng_key != "atwor":
         return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    if request_status == "Завершен":
+        new_status = get_object_or_404(HistoryStatus, id=3)
+    elif request_status == "Отклонен":
+        new_status = get_object_or_404(HistoryStatus, id=4)
 
     history.date_complete = timezone.now()
-    history.status = request_status
+    history.status = new_status
     history.moderator = get_moderator()
     history.save()
 
@@ -259,10 +275,12 @@ def delete_history(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status != "putin":
+    if history.status.eng_key != "putin":
         return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    history.status = "delet"
+    new_status = get_object_or_404(HistoryStatus, id=5)
+
+    history.status = new_status
     history.save()
 
     serializer = HistorySerializer(history, many=False)

@@ -30,6 +30,30 @@ class FilmItemSerializer(serializers.ModelSerializer):
 
 
 class HistorySerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+    films = serializers.SerializerMethodField()
+    owner = serializers.SerializerMethodField()
+    moderator = serializers.SerializerMethodField()
+
+    def get_owner(self, history):
+        return history.owner.username
+
+    def get_moderator(self, history):
+        if history.moderator:
+            return history.moderator.username
+        
+    def get_status(self, history):
+        return history.status.name
+            
+    def get_films(self, history):
+        items = FilmHistory.objects.filter(history=history)
+        return [FilmItemSerializer(item.film, context={"value": item.value}).data for item in items]
+
+    class Meta:
+        model = History
+        fields = '__all__'
+
+class HistorySerializerUpd(serializers.ModelSerializer):
     films = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
     moderator = serializers.SerializerMethodField()
@@ -51,6 +75,7 @@ class HistorySerializer(serializers.ModelSerializer):
 
 
 class HistorysSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
     moderator = serializers.SerializerMethodField()
 
@@ -60,6 +85,9 @@ class HistorysSerializer(serializers.ModelSerializer):
     def get_moderator(self, history):
         if history.moderator:
             return history.moderator.username
+        
+    def get_status(self, history):
+        return history.status.name
 
     class Meta:
         model = History
