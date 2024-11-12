@@ -131,6 +131,7 @@ def add_film_to_history(request, film_id):
     if draft_history is None:
         draft_history = History.objects.create()
         draft_history.owner = get_user()
+        draft_history.status = HistoryStatus.objects.get(eng_key='putin')
         draft_history.date_created = timezone.now()
         draft_history.save()
 
