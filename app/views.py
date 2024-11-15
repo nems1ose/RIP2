@@ -13,8 +13,11 @@ from .serializers import *
 
 
 def get_draft_history():
-    History.objects.filter(status__eng_key="putin").first()
+    return History.objects.filter(status__eng_key="putin").order_by('-id').first()
 
+def get_films(history):
+        items = FilmHistory.objects.filter(history=history)
+        return [FilmItemSerializer(item.film, context={"value": item.value}).data for item in items]
 
 def get_user():
     return User.objects.filter(is_superuser=False).first()
@@ -28,7 +31,7 @@ def get_moderator():
 def search_films(request):
     film_name = request.GET.get("film_name", "")
 
-    films = Film.objects.filter(status__eng_key="activ")
+    films = Film.objects.filter(status=1)
 
     if film_name:
         films = films.filter(name__icontains=film_name)
@@ -39,7 +42,7 @@ def search_films(request):
 
     resp = {
         "films": serializer.data,
-        "films_count": len(serializer.data),
+        "films_count": len(get_films(draft_history)),
         "draft_history": draft_history.pk if draft_history else None
     }
 
@@ -53,7 +56,7 @@ def get_film_by_id(request, film_id):
 
     film = Film.objects.get(pk=film_id)
 
-    if film.status.eng_key != "activ":
+    if film.status != 1:
         return Response({"detail": "Фильма с данным id удален"}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = FilmSerializer(film, many=False)
@@ -74,21 +77,15 @@ def update_film(request, film_id):
         film.save()
 
     status_value = request.data.get("status")
-    if status_value is not None:
-        try:
-            film_status = FilmStatus.objects.get(name=status_value)
-            request.data['status'] = film_status.id
-        except FilmStatus.DoesNotExist:
-            return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
+    if status_value is not None and status_value not in [1, 2]:
+        return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = FilmSerializerUpd(film, data=request.data, partial=True)
 
     if serializer.is_valid():
         serializer.save()
 
-    serializerOutput = FilmSerializer(film, many=False)
-
-    return Response(serializerOutput.data)
+    return Response({"detail": "Фильм обновлен"})
 
 
 @api_view(["POST"])
@@ -97,7 +94,7 @@ def create_film(request):
 
     if serializer.is_valid():
         film = serializer.save()
-        return Response(FilmSerializerUpd(film).data, status=status.HTTP_201_CREATED)
+        return Response({"detail": "Фильм создан"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -108,15 +105,15 @@ def delete_film(request, film_id):
 
     film = Film.objects.get(pk=film_id)
 
-    new_status = get_object_or_404(FilmStatus, id=2)
+    # new_status = get_object_or_404(FilmStatus, id=2)
 
-    film.status = new_status
+    film.status = 2
     film.save()
 
-    films = Film.objects.filter(status__eng_key="activ")
-    serializer = FilmSerializer(films, many=True)
+    # films = Film.objects.filter(status__eng_key="activ")
+    # serializer = FilmSerializer(films, many=True)
 
-    return Response(serializer.data)
+    return Response({"detail": "Фильм удален"})
 
 
 @api_view(["POST"])
@@ -143,8 +140,8 @@ def add_film_to_history(request, film_id):
     item.film = film
     item.save()
 
-    serializer = HistorySerializer(draft_history)
-    return Response(serializer.data["films"])
+    # serializer = HistorySerializer(draft_history)
+    return Response({"detail": "Фильм добавлен"})
 
 
 @api_view(["POST"])
@@ -159,9 +156,9 @@ def update_film_image(request, film_id):
         film.image = image
         film.save()
 
-    serializer = FilmSerializer(film)
+    # serializer = FilmSerializer(film)
 
-    return Response(serializer.data)
+    return Response({"detail": "Фильм обновлен"})
 
 
 @api_view(["GET"])
@@ -222,9 +219,9 @@ def update_history(request, history_id):
     if serializer.is_valid():
         serializer.save()
 
-    serializerOutput = HistorySerializer(history, many=False)
+    # serializerOutput = HistorySerializer(history, many=False)
 
-    return Response(serializerOutput.data)
+    return Response({"detail": "История обновлена"})
 
 
 @api_view(["PUT"])
@@ -243,9 +240,9 @@ def update_status_user(request, history_id):
     history.date_formation = timezone.now()
     history.save()
 
-    serializer = HistorySerializer(history, many=False)
+    # serializer = HistorySerializer(history, many=False)
 
-    return Response(serializer.data)
+    return Response({"detail": "Статус обновлен"})
 
 
 @api_view(["PUT"])
@@ -273,9 +270,9 @@ def update_status_admin(request, history_id):
     history.moderator = get_moderator()
     history.save()
 
-    serializer = HistorySerializer(history, many=False)
+    # serializer = HistorySerializer(history, many=False)
 
-    return Response(serializer.data)
+    return Response({"detail": "Статус обновлен"})
 
 
 @api_view(["DELETE"])
@@ -293,9 +290,9 @@ def delete_history(request, history_id):
     history.status = new_status
     history.save()
 
-    serializer = HistorySerializer(history, many=False)
+    # serializer = HistorySerializer(history, many=False)
 
-    return Response(serializer.data)
+    return Response({"detail": "История удалена"})
 
 
 @api_view(["DELETE"])
@@ -313,9 +310,9 @@ def delete_film_from_history(request, history_id, film_id):
 
     if len(films) == 0:
         history.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "Фильм удален, история удалена"}, status=status.HTTP_204_NO_CONTENT)
 
-    return Response(films)
+    return Response({"detail": "Фильм удален"})
 
 
 @api_view(["PUT"])
@@ -330,7 +327,7 @@ def update_film_in_history(request, history_id, film_id):
     if serializer.is_valid():
         serializer.save()
 
-    return Response(serializer.data)
+    return Response({"detail": "Данные обновлены"})
 
 
 @api_view(["POST"])
@@ -340,11 +337,11 @@ def register(request):
     if not serializer.is_valid():
         return Response({"detail": "Пользователь с данным логином уже существует"}, status=status.HTTP_409_CONFLICT)
 
-    user = serializer.save()
+    serializer.save()
 
-    serializer = UserSerializer(user)
+    # serializer = UserSerializer(user)
 
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response({"detail": "Пользователь создан"}, status=status.HTTP_201_CREATED)
 
 
 @api_view(["POST"])
@@ -358,9 +355,9 @@ def login(request):
     if user is None:
         return Response({"detail": "Логин или пароль введены неверно"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    serializer = UserSerializer(user)
+    # serializer = UserSerializer(user)
 
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"detail": "Успешно"}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -381,4 +378,4 @@ def update_user(request, user_id):
 
     serializer.save()
 
-    return Response(serializer.data)
+    return Response({"detail": "Данные пользователя обновлены"})

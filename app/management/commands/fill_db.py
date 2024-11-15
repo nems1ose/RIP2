@@ -17,18 +17,18 @@ def add_users():
 
     print("Пользователи созданы")
 
-def add_film_status():
-    FilmStatus.objects.create(
-        eng_key="activ",
-        name="Действует"
-    )
+# def add_film_status():
+#     FilmStatus.objects.create(
+#         eng_key="activ",
+#         name="Действует"
+#     )
 
-    FilmStatus.objects.create(
-        eng_key="delet",
-        name="Удалена"
-    )
+#     FilmStatus.objects.create(
+#         eng_key="delet",
+#         name="Удалена"
+#     )
 
-    print("Статусы фильмов добавлены")
+#     print("Статусы фильмов добавлены")
 
 def add_history_status():
     HistoryStatus.objects.create(
@@ -61,7 +61,7 @@ def add_history_status():
 
 def add_films():
 
-    status = FilmStatus.objects.get(eng_key='activ')
+    # status = FilmStatus.objects.get(eng_key='activ')
 
     Film.objects.create(
         name="Большая игра",
@@ -70,7 +70,7 @@ def add_films():
         year=2017,
         country="США",
         image="1.png",
-        status=status
+        # status=status
     )
 
     Film.objects.create(
@@ -80,7 +80,7 @@ def add_films():
         year=2016,
         country="США",
         image="2.png",
-        status=status
+        # status=status
     )
 
     Film.objects.create(
@@ -90,7 +90,7 @@ def add_films():
         year=2021,
         country="Великобритания",
         image="3.png",
-        status=status
+        # status=status
     )
 
     Film.objects.create(
@@ -100,7 +100,7 @@ def add_films():
         year=2015,
         country="США",
         image="4.png",
-        status=status
+        # status=status
     )
 
     Film.objects.create(
@@ -110,7 +110,7 @@ def add_films():
         year=2017,
         country="США",
         image="5.png",
-        status=status
+        # status=status
     )
 
     Film.objects.create(
@@ -120,7 +120,7 @@ def add_films():
         year=2020,
         country="Россия",
         image="6.png",
-        status=status
+        # status=status
     )
 
     client = Minio("minio:9000", "minio", "minio123", secure=False)
@@ -191,7 +191,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         add_users()
         add_history_status()
-        add_film_status()
+        # add_film_status()
         add_films()
         add_historys()
 
