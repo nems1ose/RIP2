@@ -197,6 +197,17 @@ def get_history_by_id(request, history_id):
 
     return Response(serializer.data)
 
+@api_view(["GET"])
+def search_historys_statuses(request):
+    statuses = HistoryStatus.objects
+
+    if not statuses:
+        return Response({"detail": "Статусы не найдены"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = HistoryStatusesSerializer(statuses, many=True)
+
+    return Response(serializer.data)
+
 
 @api_view(["PUT"])
 def update_history(request, history_id):

@@ -14,6 +14,7 @@ urlpatterns = [
     # Набор методов для заявок
     path('api/historys/', search_historys),  # GET
     path('api/historys/<int:history_id>/', get_history_by_id),  # GET
+    path('api/historys_statuses/', search_historys_statuses),  # GET
     path('api/historys/<int:history_id>/update/', update_history),  # PUT
     path('api/historys/<int:history_id>/update_status_user/', update_status_user),  # PUT
     path('api/historys/<int:history_id>/update_status_admin/', update_status_admin),  # PUT

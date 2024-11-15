@@ -42,6 +42,12 @@ class FilmItemSerializer(serializers.ModelSerializer):
         model = Film
         fields = ("id", "name", "image", "value")
 
+class HistoryStatusesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HistoryStatus
+        fields = ("id", "name")
+
 
 class HistorySerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()

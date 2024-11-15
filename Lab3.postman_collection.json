@@ -240,6 +240,27 @@
 			"response": []
 		},
 		{
+			"name": "Статусы историй",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/historys_statuses/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"historys_statuses",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Обновление истории",
 			"request": {
 				"method": "PUT",
