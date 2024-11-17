@@ -16,8 +16,8 @@ def get_draft_history():
     return History.objects.filter(status__eng_key="input").order_by('-id').first()
 
 def get_films(history):
-        items = FilmHistory.objects.filter(history=history)
-        return [FilmItemSerializer(item.film, context={"value": item.value}).data for item in items]
+    items = FilmHistory.objects.filter(history=history)
+    return [FilmItemSerializer(item.film, context={"value": item.value}).data for item in items]
 
 def get_user():
     return User.objects.filter(is_superuser=False).first()
