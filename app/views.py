@@ -77,7 +77,7 @@ def update_film(request, film_id):
         film.save()
 
     status_value = request.data.get("status")
-    if status_value is not None and status_value not in [1, 2]:
+    if status_value is not None and status_value not in ['1', '2']:
         return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = FilmSerializerUpd(film, data=request.data, partial=True)
