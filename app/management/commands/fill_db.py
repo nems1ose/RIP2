@@ -18,7 +18,7 @@ def add_users():
 
 def add_history_status():
     HistoryStatus.objects.create(
-        eng_key="putin",
+        eng_key="input",
         name="Введён"
     )
 
@@ -116,7 +116,7 @@ def add_films():
 def add_historys():
     users = User.objects.filter(is_staff=False)
     moderators = User.objects.filter(is_staff=True)
-    statuses = HistoryStatus.objects.exclude(name='putin')
+    statuses = HistoryStatus.objects.exclude(name='input')
 
     if len(users) == 0 or len(moderators) == 0:
         print("Заявки не могут быть добавлены. Сначала добавьте пользователей с помощью команды add_users")
@@ -133,7 +133,7 @@ def add_historys():
         owner = random.choice(users)
         add_history(status, films, owner, moderators)
 
-    # add_history("putin", films, users[0], moderators)
+    # add_history("input", films, users[0], moderators)
     # add_history("atwor", films, users[0], moderators)
 
     print("Заявки добавлены")

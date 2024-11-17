@@ -36,8 +36,12 @@ class HistoryStatusesSerializer(serializers.ModelSerializer):
 
 
 class HistorysSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
     owner = serializers.StringRelatedField(read_only=True)
     moderator = serializers.StringRelatedField(read_only=True)
+
+    def get_status(self, history):
+        return history.status.name
 
     class Meta:
         model = History
