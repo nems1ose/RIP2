@@ -13,7 +13,7 @@ from .serializers import *
 
 
 def get_draft_history():
-    return History.objects.filter(status__eng_key="putin").order_by('-id').first()
+    return History.objects.filter(status__eng_key="input").order_by('-id').first()
 
 def get_films(history):
         items = FilmHistory.objects.filter(history=history)
@@ -128,7 +128,7 @@ def add_film_to_history(request, film_id):
     if draft_history is None:
         draft_history = History.objects.create()
         draft_history.owner = get_user()
-        draft_history.status = HistoryStatus.objects.get(eng_key='putin')
+        draft_history.status = HistoryStatus.objects.get(eng_key='input')
         draft_history.date_created = timezone.now()
         draft_history.save()
 
@@ -167,7 +167,7 @@ def search_historys(request):
     date_formation_start = request.GET.get("date_formation_start")
     date_formation_end = request.GET.get("date_formation_end")
 
-    historys = History.objects.exclude(status__eng_key__in=["putin", "delet"])
+    historys = History.objects.exclude(status__eng_key__in=["input", "delet"])
 
     if status != "unknown":
         historys = historys.filter(status__name=status)
@@ -190,7 +190,7 @@ def get_history_by_id(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status.eng_key == "putin" or history.status.eng_key == "delet":
+    if history.status.eng_key == "input" or history.status.eng_key == "delet":
         return Response({"detail": "История с данным id недействительна"}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = HistorySerializer(history, many=False)
@@ -242,7 +242,7 @@ def update_status_user(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status.eng_key != "putin":
+    if history.status.eng_key != "input":
         return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_400_BAD_REQUEST)
     
     new_status = get_object_or_404(HistoryStatus, id=2)
@@ -293,7 +293,7 @@ def delete_history(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status.eng_key != "putin":
+    if history.status.eng_key != "input":
         return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_400_BAD_REQUEST)
 
     new_status = get_object_or_404(HistoryStatus, id=5)
