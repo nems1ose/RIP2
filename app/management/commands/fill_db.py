@@ -15,18 +15,6 @@ def add_users():
 
     print("Пользователи созданы")
 
-def add_film_status():
-    FilmStatus.objects.create(
-        eng_key="activ",
-        name="Действует"
-    )
-
-    FilmStatus.objects.create(
-        eng_key="delet",
-        name="Удалена"
-    )
-
-    print("Статусы фильмов добавлены")
 
 def add_history_status():
     HistoryStatus.objects.create(
@@ -59,16 +47,13 @@ def add_history_status():
 
 def add_films():
 
-    status = FilmStatus.objects.get(eng_key='activ')
-
     Film.objects.create(
         name="Большая игра",
         description="Один из самых полезных для человека фильм. Оно богато белком, витаминами A и D, кальцием. Недаром с давних пор люди стали не только покупать молоко оптом, но и придумывать рецепты изготовления из него разных фильм.",
         time=134,
         year=2017,
         country="США",
-        image="1.png",
-        status=status
+        image="1.png"
     )
 
     Film.objects.create(
@@ -77,8 +62,7 @@ def add_films():
         time=127,
         year=2016,
         country="США",
-        image="2.png",
-        status=status
+        image="2.png"
     )
 
     Film.objects.create(
@@ -87,8 +71,7 @@ def add_films():
         time=113,
         year=2021,
         country="Великобритания",
-        image="3.png",
-        status=status
+        image="3.png"
     )
 
     Film.objects.create(
@@ -97,8 +80,7 @@ def add_films():
         time=120,
         year=2015,
         country="США",
-        image="4.png",
-        status=status
+        image="4.png"
     )
 
     Film.objects.create(
@@ -107,8 +89,7 @@ def add_films():
         time=107,
         year=2017,
         country="США",
-        image="5.png",
-        status=status
+        image="5.png"
     )
 
     Film.objects.create(
@@ -117,8 +98,7 @@ def add_films():
         time=76,
         year=2020,
         country="Россия",
-        image="6.png",
-        status=status
+        image="6.png"
     )
 
     client = Minio("minio:9000", "minio", "minio123", secure=False)
@@ -193,7 +173,6 @@ def add_history(status, films, owner, moderators):
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         add_users()
-        add_film_status()
         add_history_status()
         add_films()
         add_historys()

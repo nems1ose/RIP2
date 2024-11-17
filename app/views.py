@@ -23,9 +23,7 @@ def get_draft_history(request):
     if user is None:
         return None
 
-    history = History.objects.filter(owner=user).filter(status__eng_key="putin").first()
-
-    return history
+    return History.objects.filter(owner=user).filter(status__eng_key="input").order_by('-id').first()
 
 
 @swagger_auto_schema(
@@ -42,7 +40,7 @@ def get_draft_history(request):
 def search_films(request):
     film_name = request.GET.get("film_name", "")
 
-    films = Film.objects.filter(status__eng_key="activ")
+    films = Film.objects.filter(status=1)
 
     if film_name:
         films = films.filter(name__icontains=film_name)
@@ -67,7 +65,7 @@ def get_film_by_id(request, film_id):
 
     film = Film.objects.get(pk=film_id)
 
-    if film.status.eng_key != "activ":
+    if film.status != 1:
         return Response({"detail": "Фильма с данным id удален"}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = FilmSerializer(film, many=False)
@@ -85,21 +83,17 @@ def update_film(request, film_id):
     film = Film.objects.get(pk=film_id)
 
     status_value = request.data.get("status")
-    if status_value is not None:
-        try:
-            film_status = FilmStatus.objects.get(name=status_value)
-            request.data['status'] = film_status.id
-        except FilmStatus.DoesNotExist:
-            return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
+    if status_value is not None and status_value not in ['1', '2']:
+        return Response({"detail": "Введены некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = FilmSerializerUpd(film, data=request.data, partial=True)
 
     if serializer.is_valid(raise_exception=True):
         serializer.save()
 
-    serializerOutput = FilmSerializer(film, many=False)
+    # serializerOutput = FilmSerializer(film, many=False)
 
-    return Response(serializerOutput.data)
+    return Response({"detail": "Фильм обновлен"})
 
 
 @swagger_auto_schema(method='post', request_body=FilmSerializer)
@@ -118,7 +112,7 @@ def create_film(request):
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     if serializer.is_valid():
         film = serializer.save()
-        return Response(FilmSerializerUpd(film).data, status=status.HTTP_201_CREATED)
+        return Response({"detail": "Фильм создан"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -130,16 +124,15 @@ def delete_film(request, film_id):
 
     film = Film.objects.get(pk=film_id)
 
-    new_status = get_object_or_404(FilmStatus, id=2)
+    # new_status = get_object_or_404(FilmStatus, id=2)
 
-    film.status = new_status
-
+    film.status = 2
     film.save()
 
-    film = Film.objects.filter(status__eng_key="activ")
-    serializer = FilmSerializer(film, many=True)
+    # film = Film.objects.filter(status__eng_key="activ")
+    # serializer = FilmSerializer(film, many=True)
 
-    return Response(serializer.data)
+    return Response({"detail": "Фильм удален"})
 
 
 @swagger_auto_schema(method='post', request_body=HistorySerializer)
@@ -156,7 +149,7 @@ def add_film_to_history(request, film_id):
     if draft_history is None:
         draft_history = History.objects.create()
         draft_history.date_created = timezone.now()
-        draft_history.status = HistoryStatus.objects.get(eng_key='putin')
+        draft_history.status = HistoryStatus.objects.get(eng_key='input')
         draft_history.owner = identity_user(request)
         draft_history.save()
 
@@ -168,8 +161,7 @@ def add_film_to_history(request, film_id):
     item.film = film
     item.save()
 
-    serializer = HistorySerializer(draft_history)
-    return Response(serializer.data["films"])
+    return Response({"detail": "Фильм добавлен"})
 
 
 @api_view(["POST"])
@@ -188,9 +180,7 @@ def update_film_image(request, film_id):
     film.image = image
     film.save()
 
-    serializer = FilmSerializer(film)
-
-    return Response(serializer.data)
+    return Response({"detail": "Фильм обновлен"})
 
 
 @api_view(["GET"])
@@ -200,7 +190,7 @@ def search_historys(request):
     date_formation_start = request.GET.get("date_formation_start")
     date_formation_end = request.GET.get("date_formation_end")
 
-    historys = History.objects.exclude(status__eng_key__in=["putin", "delet"])
+    historys = History.objects.exclude(status__eng_key__in=["input", "delet"])
 
     user = identity_user(request)
     if not user.is_superuser:
@@ -230,10 +220,22 @@ def get_history_by_id(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status.eng_key == "putin" or history.status.eng_key == "delet":
+    if history.status.eng_key == "input" or history.status.eng_key == "delet":
         return Response({"detail": "История с данным id недействительна"}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = HistorySerializer(history)
+
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def search_historys_statuses(request):
+    statuses = HistoryStatus.objects
+
+    if not statuses:
+        return Response({"detail": "Статусы не найдены"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = HistoryStatusesSerializer(statuses, many=True)
 
     return Response(serializer.data)
 
@@ -263,9 +265,9 @@ def update_history(request, history_id):
     if serializer.is_valid():
         serializer.save()
 
-    serializerOutput = HistorySerializer(history, many=False)
+    # serializerOutput = HistorySerializer(history, many=False)
 
-    return Response(serializerOutput.data)
+    return Response({"detail": "История обновлена"})
 
 
 @swagger_auto_schema(method='put', request_body=HistorySerializer)
@@ -279,7 +281,7 @@ def update_status_user(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status.eng_key != "putin":
+    if history.status.eng_key != "input":
         return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     new_status = get_object_or_404(HistoryStatus, id=2)
@@ -288,9 +290,9 @@ def update_status_user(request, history_id):
     history.date_formation = timezone.now()
     history.save()
 
-    serializer = HistorySerializer(history)
+    # serializer = HistorySerializer(history, many=False)
 
-    return Response(serializer.data)
+    return Response({"detail": "Статус обновлен"})
 
 
 @swagger_auto_schema(method='put', request_body=HistorySerializer)
@@ -323,9 +325,9 @@ def update_status_admin(request, history_id):
     history.moderator = identity_user(request)
     history.save()
 
-    serializer = HistorySerializer(history)
+    # serializer = HistorySerializer(history, many=False)
 
-    return Response(serializer.data)
+    return Response({"detail": "Статус обновлен"})
 
 
 @api_view(["DELETE"])
@@ -338,7 +340,7 @@ def delete_history(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status.eng_key != "putin":
+    if history.status.eng_key != "input":
         return Response({"detail": "Вы не можете обновить статус истории с данным id"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     new_status = get_object_or_404(HistoryStatus, id=5)
@@ -346,7 +348,7 @@ def delete_history(request, history_id):
     history.status = new_status
     history.save()
 
-    return Response(status=status.HTTP_200_OK)
+    return Response({"detail": "История удалена"})
 
 
 @api_view(["DELETE"])
@@ -370,9 +372,9 @@ def delete_film_from_history(request, history_id, film_id):
 
     if len(films) == 0:
         history.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "Фильм удален, история удалена"}, status=status.HTTP_204_NO_CONTENT)
 
-    return Response(films)
+    return Response({"detail": "Фильм удален"})
 
 
 @swagger_auto_schema(method='PUT', request_body=FilmHistorySerializer)
@@ -394,7 +396,7 @@ def update_film_in_history(request, history_id, film_id):
     if serializer.is_valid():
         serializer.save()
 
-    return Response(serializer.data)
+    return Response({"detail": "Данные обновлены"})
 
 
 @swagger_auto_schema(method='post', request_body=UserLoginSerializer)

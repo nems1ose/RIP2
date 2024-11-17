@@ -4,14 +4,14 @@ from .models import *
 
 
 class FilmSerializer(serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
+    # status = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
     def get_image(self, film):
         return film.image.url.replace("minio", "localhost", 1)
     
-    def get_status(self, film):
-        return film.status.name
+    # def get_status(self, film):
+    #     return film.status.name
 
     class Meta:
         model = Film
@@ -26,6 +26,13 @@ class FilmSerializerUpd(serializers.ModelSerializer):
     class Meta:
         model = Film
         fields = "__all__"
+
+
+class HistoryStatusesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HistoryStatus
+        fields = ("id", "name")
 
 
 class HistorysSerializer(serializers.ModelSerializer):

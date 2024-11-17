@@ -3,17 +3,17 @@ from django.contrib.auth.models import PermissionsMixin, User
 from django.db import models
 
 
-class FilmStatus(models.Model):
-    eng_key = models.CharField(max_length=50, verbose_name="Название")
-    name = models.CharField(max_length=50, verbose_name="Описание")
+# class FilmStatus(models.Model):
+#     eng_key = models.CharField(max_length=50, verbose_name="Название")
+#     name = models.CharField(max_length=50, verbose_name="Описание")
 
-    def __str__(self):
-        return self.eng_key
+#     def __str__(self):
+#         return self.eng_key
 
-    class Meta:
-        verbose_name = "Статус фильма"
-        verbose_name_plural = "Статусы фильмов"
-        db_table = "film_status"
+#     class Meta:
+#         verbose_name = "Статус фильма"
+#         verbose_name_plural = "Статусы фильмов"
+#         db_table = "film_status"
 
 
 class HistoryStatus(models.Model):
@@ -30,14 +30,14 @@ class HistoryStatus(models.Model):
 
 
 class Film(models.Model):
-    # STATUS_CHOICES = (
-    #     ("activ", 'Действует'),
-    #     ("delet", 'Удалена'),
-    # )
+    STATUS_CHOICES = (
+        (1, 'Действует'),
+        (2, 'Удалена'),
+    )
 
     name = models.CharField(max_length=100, verbose_name="Название")
     description = models.TextField(max_length=500, verbose_name="Описание",)
-    status = models.ForeignKey(FilmStatus, on_delete=models.DO_NOTHING, blank=True, null=True)
+    status = models.CharField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
     image = models.ImageField(verbose_name="Фото", blank=True, null=True)
 
     time = models.IntegerField()
