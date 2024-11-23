@@ -65,7 +65,7 @@ def get_film_by_id(request, film_id):
 
     film = Film.objects.get(pk=film_id)
 
-    if film.status != 1:
+    if film.status != '1':
         return Response({"detail": "Фильма с данным id удален"}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = FilmSerializer(film, many=False)
@@ -220,8 +220,8 @@ def get_history_by_id(request, history_id):
 
     history = History.objects.get(pk=history_id)
 
-    if history.status.eng_key == "input" or history.status.eng_key == "delet":
-        return Response({"detail": "История с данным id недействительна"}, status=status.HTTP_404_NOT_FOUND)
+    if history.status.eng_key == "delet":
+        return Response({"detail": "История с данным id удалена"}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = HistorySerializer(history)
 
