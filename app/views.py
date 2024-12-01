@@ -15,6 +15,7 @@ from .permissions import *
 from .redis import session_storage
 from .serializers import *
 from .utils import identity_user, get_session, random_date
+from .utils import *
 
 
 def get_draft_history(request):
@@ -314,6 +315,7 @@ def update_status_admin(request, history_id):
 
     if request_status == "compl":
         history.date = random_date()
+        history.estimation = random.randint(1, 5)
 
     if request_status == "Завершен":
         new_status = get_object_or_404(HistoryStatus, id=3)

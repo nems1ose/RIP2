@@ -154,8 +154,7 @@ def add_history(status, films, owner, moderators):
 
     if status == "compl":
         history.date = random_date()
-
-    history.estimation = random.randint(1, 5)
+        history.estimation = random.randint(1, 5)
 
     history.owner = owner
 
